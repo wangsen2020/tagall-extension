@@ -42,14 +42,15 @@
       stopButton.style.display = "inline-block";
       const originalText = button.textContent;
       try {
-        await TagAll.controller.tagCurrentGroup({
+        const result = await TagAll.controller.tagCurrentGroup({
           onProgress: (current, total) => { button.textContent = `${current}/${total}`; }
         });
+        if (result.mode === "native-all") button.textContent = "@all ready";
       } catch (error) {
         console.warn("TagAll:", error.message);
       } finally {
         button.disabled = false;
-        button.textContent = originalText;
+        setTimeout(() => { button.textContent = originalText; }, 1000);
         stopButton.disabled = false;
         stopButton.style.display = "none";
         stopButton.title = "Stop preparing mentions";

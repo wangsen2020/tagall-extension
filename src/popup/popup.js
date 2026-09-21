@@ -23,7 +23,13 @@ async function prepareMentions() {
   try {
     const response = await send("TAG_ALL");
     if (!response?.ok) throw new Error(response?.error || "TagAll could not reach WhatsApp Web.");
-    setStatus(response.cancelled ? "Stopped. Existing mentions were kept." : `Prepared ${response.completed} mentions. Review and send when ready.`);
+    if (response.cancelled) {
+      setStatus("Stopped. Existing mentions were kept.");
+    } else if (response.mode === "native-all") {
+      setStatus("WhatsApp native @all is available and ready. Review and send when ready.");
+    } else {
+      setStatus(`Prepared ${response.completed} individual mentions. Review and send when ready.`);
+    }
   } catch (error) {
     setStatus(error.message);
   } finally {

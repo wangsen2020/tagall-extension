@@ -20,14 +20,14 @@
     ]).filter((element) => element.offsetParent !== null);
   }
 
-  async function selectMention(query, shouldCancel) {
+  async function selectMention(query, shouldCancel, exactOnly = false) {
     const target = normaliseForMatch(query);
     for (let attempt = 0; attempt < 8; attempt += 1) {
       if (shouldCancel()) return null;
       const options = visibleMentionOptions();
       const exact = options.find((option) => normaliseForMatch(option.textContent || "") === target);
       const partial = options.find((option) => normaliseForMatch(option.textContent || "").includes(target));
-      const candidate = exact || partial;
+      const candidate = exact || (exactOnly ? null : partial);
       if (candidate) {
         candidate.click();
         return true;
@@ -58,6 +58,16 @@
     return false;
   }
 
+  async function tryAppendNativeAll(composer) {
+    const query = "all";
+    insertText(composer, `@${query}`);
+    await wait(150);
+    const selected = await selectMention(query, () => false, true);
+    if (selected) return true;
+    removeFailedQuery(composer);
+    return false;
+  }
+
   async function appendMentions({ composer, participants, delayMs, shouldCancel, onProgress }) {
     if (composer.textContent.trim() && !/\s$/.test(composer.textContent)) insertText(composer, " ");
 
@@ -74,5 +84,5 @@
     return { cancelled: false, completed: participants.length };
   }
 
-  TagAll.mentions = Object.freeze({ appendMentions, normaliseForMatch });
+  TagAll.mentions = Object.freeze({ appendMentions, normaliseForMatch, tryAppendNativeAll });
 })();

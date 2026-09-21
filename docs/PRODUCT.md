@@ -8,6 +8,8 @@ WhatsApp's native `@all` is the fastest option when it is available and a user h
 
 **TagAll prepares individual mentions when native `@all` is unavailable to you.**
 
+The extension first checks the currently open group for a selectable native `@all` command. If the command is present, TagAll uses it. If it is absent, TagAll prepares individual mentions instead.
+
 The product must not claim to unlock WhatsApp's native feature or evade an administrator's permissions. It saves the manual work of selecting members one by one and leaves the message unsent for human review.
 
 ## Primary audience
