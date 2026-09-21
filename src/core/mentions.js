@@ -9,13 +9,49 @@
     if (!success) throw new Error("TagAll could not write to the message box.");
   }
 
-  function acceptMention(composer) {
-    composer.dispatchEvent(new KeyboardEvent("keydown", {
-      key: "Tab", code: "Tab", bubbles: true, cancelable: true
-    }));
-    composer.dispatchEvent(new KeyboardEvent("keyup", {
-      key: "Tab", code: "Tab", bubbles: true, cancelable: true
-    }));
+  function normaliseForMatch(value) {
+    return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+  }
+
+  function visibleMentionOptions() {
+    const containers = [...document.querySelectorAll('[role="listbox"], [data-testid*="mention"]')];
+    return containers.flatMap((container) => [
+      ...container.querySelectorAll('[role="option"], [role="listitem"], button')
+    ]).filter((element) => element.offsetParent !== null);
+  }
+
+  async function selectMention(query) {
+    const target = normaliseForMatch(query);
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const options = visibleMentionOptions();
+      const exact = options.find((option) => normaliseForMatch(option.textContent || "") === target);
+      const partial = options.find((option) => normaliseForMatch(option.textContent || "").includes(target));
+      const candidate = exact || partial;
+      if (candidate) {
+        candidate.click();
+        return true;
+      }
+      await wait(100);
+    }
+    return false;
+  }
+
+  function removeFailedQuery(composer) {
+    composer.focus();
+    if (!document.execCommand("undo", false, null)) {
+      throw new Error("TagAll could not safely remove an unmatched mention query.");
+    }
+  }
+
+  async function appendOneMention(composer, participant, delayMs) {
+    for (const query of TagAll.participants.mentionQueries(participant)) {
+      insertText(composer, `@${query}`);
+      await wait(delayMs);
+      if (await selectMention(query)) return true;
+      removeFailedQuery(composer);
+      await wait(50);
+    }
+    return false;
   }
 
   async function appendMentions({ composer, participants, delayMs, shouldCancel, onProgress }) {
@@ -23,15 +59,15 @@
 
     for (const [index, participant] of participants.entries()) {
       if (shouldCancel()) return { cancelled: true, completed: index };
-      insertText(composer, `@${participant}`);
-      await wait(delayMs);
-      acceptMention(composer);
-      await wait(delayMs);
+      const selected = await appendOneMention(composer, participant, delayMs);
+      if (!selected) {
+        throw new Error(`TagAll could not select the WhatsApp member: ${participant}`);
+      }
       insertText(composer, " ");
       onProgress(index + 1, participants.length);
     }
     return { cancelled: false, completed: participants.length };
   }
 
-  TagAll.mentions = Object.freeze({ appendMentions });
+  TagAll.mentions = Object.freeze({ appendMentions, normaliseForMatch });
 })();

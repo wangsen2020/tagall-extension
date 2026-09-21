@@ -10,7 +10,7 @@ This is especially useful for community operators, promoters, organizers, and su
 
 ## Status
 
-This is an early open-source foundation. WhatsApp Web is a third-party interface whose markup can change without notice, so the participant-detection logic needs ongoing browser testing.
+This is an early open-source foundation. WhatsApp Web is a third-party interface whose markup can change without notice, so the participant-detection logic needs ongoing browser testing. TagAll selects WhatsApp's visible mention candidate instead of treating typed `@name` text as a successful mention; this distinction is especially important for members whose visible label is a phone number.
 
 ## Project structure
 
