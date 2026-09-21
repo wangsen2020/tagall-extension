@@ -20,8 +20,22 @@
     ]).filter((element) => element.offsetParent !== null);
   }
 
-  async function selectMention(query, shouldCancel, exactOnly = false) {
+  function nativeMentionCount(composer) {
+    return composer.querySelectorAll("[data-app-text-template]").length;
+  }
+
+  function acceptFirstSuggestion(composer) {
+    composer.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Tab", code: "Tab", bubbles: true, cancelable: true
+    }));
+    composer.dispatchEvent(new KeyboardEvent("keyup", {
+      key: "Tab", code: "Tab", bubbles: true, cancelable: true
+    }));
+  }
+
+  async function selectMention(composer, query, shouldCancel, exactOnly = false) {
     const target = normaliseForMatch(query);
+    const mentionCountBeforeSelection = nativeMentionCount(composer);
     for (let attempt = 0; attempt < 8; attempt += 1) {
       if (shouldCancel()) return null;
       const options = visibleMentionOptions();
@@ -34,7 +48,10 @@
       }
       await wait(100);
     }
-    return false;
+    if (exactOnly) return false;
+    acceptFirstSuggestion(composer);
+    await wait(100);
+    return nativeMentionCount(composer) > mentionCountBeforeSelection;
   }
 
   function removeFailedQuery(composer) {
@@ -49,7 +66,7 @@
       if (shouldCancel()) return null;
       insertText(composer, `@${query}`);
       await wait(delayMs);
-      const selected = await selectMention(query, shouldCancel);
+      const selected = await selectMention(composer, query, shouldCancel);
       if (selected) return true;
       removeFailedQuery(composer);
       if (shouldCancel()) return null;
@@ -62,7 +79,7 @@
     const query = "all";
     insertText(composer, `@${query}`);
     await wait(150);
-    const selected = await selectMention(query, () => false, true);
+    const selected = await selectMention(composer, query, () => false, true);
     if (selected) return true;
     removeFailedQuery(composer);
     return false;

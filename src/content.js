@@ -1,13 +1,30 @@
 (() => {
   const TagAll = globalThis.TagAll;
 
-  async function refreshInlineButton() {
-    const { showInlineButton = TagAll.config.defaults.showInlineButton } = await chrome.storage.sync.get(
-      TagAll.config.storageKeys.showInlineButton
-    );
-    if (showInlineButton && TagAll.dom.isGroupConversation()) TagAll.inlineButton.mount();
-    else TagAll.inlineButton.remove();
+  function isExtensionContextValid() {
+    try {
+      return Boolean(chrome.runtime?.id);
+    } catch {
+      return false;
+    }
   }
+
+  async function refreshInlineButton() {
+    if (!isExtensionContextValid()) return;
+    try {
+      const { showInlineButton = TagAll.config.defaults.showInlineButton } = await chrome.storage.sync.get(
+        TagAll.config.storageKeys.showInlineButton
+      );
+      if (showInlineButton && TagAll.dom.isGroupConversation()) TagAll.inlineButton.mount();
+      else TagAll.inlineButton.remove();
+    } catch (error) {
+      if (!String(error?.message).includes("Extension context invalidated")) {
+        console.warn("TagAll could not refresh its inline button:", error);
+      }
+    }
+  }
+
+  if (!isExtensionContextValid()) return;
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.type === "TAG_ALL") {
