@@ -4,6 +4,8 @@ TagAll is a small, privacy-first Chrome extension for people who need to mention
 
 When used in a group, TagAll checks for WhatsApp's native `@all` candidate first. If it can select the native command, it uses that single mention. Otherwise it falls back to individually selected member mentions.
 
+If WhatsApp cannot match a participant, TagAll removes that failed query, records it as skipped, and continues with the remaining members. It never leaves an unmatched `@name` or `@phone` as if it were a real mention.
+
 ## Why TagAll exists
 
 WhatsApp has introduced a native `@all` group mention. Its rollout, availability, and permissions can vary by group and account. TagAll does not replace or circumvent native `@all` permissions. It helps a user prepare the same individual mentions they could otherwise add manually when the native command is unavailable to them.

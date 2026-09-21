@@ -28,7 +28,10 @@ async function prepareMentions() {
     } else if (response.mode === "native-all") {
       setStatus("WhatsApp native @all is available and ready. Review and send when ready.");
     } else {
-      setStatus(`Prepared ${response.completed} individual mentions. Review and send when ready.`);
+      const skipped = response.skipped?.length || 0;
+      setStatus(skipped
+        ? `Prepared ${response.completed} mentions. ${skipped} members could not be matched and were skipped.`
+        : `Prepared ${response.completed} individual mentions. Review and send when ready.`);
     }
   } catch (error) {
     setStatus(error.message);

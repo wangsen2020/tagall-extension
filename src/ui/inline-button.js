@@ -43,7 +43,9 @@
       const originalText = button.textContent;
       try {
         const result = await TagAll.controller.tagCurrentGroup({
-          onProgress: (current, total) => { button.textContent = `${current}/${total}`; }
+          onProgress: (current, total, details) => {
+            button.textContent = details.skipped ? `${current}/${total} (${details.skipped} skipped)` : `${current}/${total}`;
+          }
         });
         if (result.mode === "native-all") button.textContent = "@all ready";
       } catch (error) {

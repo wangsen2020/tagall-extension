@@ -54,8 +54,21 @@
     return nativeMentionCount(composer) > mentionCountBeforeSelection;
   }
 
-  function removeFailedQuery(composer) {
+  function removeFailedQuery(composer, query) {
     composer.focus();
+    const textNodeWalker = document.createTreeWalker(composer, NodeFilter.SHOW_TEXT);
+    let lastTextNode = null;
+    while (textNodeWalker.nextNode()) lastTextNode = textNodeWalker.currentNode;
+
+    if (lastTextNode?.textContent.endsWith(query)) {
+      const range = document.createRange();
+      range.setStart(lastTextNode, lastTextNode.textContent.length - query.length);
+      range.setEnd(lastTextNode, lastTextNode.textContent.length);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      if (document.execCommand("delete", false, null)) return;
+    }
     if (!document.execCommand("undo", false, null)) {
       throw new Error("TagAll could not safely remove an unmatched mention query.");
     }
@@ -68,7 +81,7 @@
       await wait(delayMs);
       const selected = await selectMention(composer, query, shouldCancel);
       if (selected) return true;
-      removeFailedQuery(composer);
+      removeFailedQuery(composer, `@${query}`);
       if (shouldCancel()) return null;
       await wait(50);
     }
@@ -81,24 +94,29 @@
     await wait(150);
     const selected = await selectMention(composer, query, () => false, true);
     if (selected) return true;
-    removeFailedQuery(composer);
+    removeFailedQuery(composer, `@${query}`);
     return false;
   }
 
   async function appendMentions({ composer, participants, delayMs, shouldCancel, onProgress }) {
     if (composer.textContent.trim() && !/\s$/.test(composer.textContent)) insertText(composer, " ");
+    const skipped = [];
+    let completed = 0;
 
     for (const [index, participant] of participants.entries()) {
       if (shouldCancel()) return { cancelled: true, completed: index };
       const selected = await appendOneMention(composer, participant, delayMs, shouldCancel);
       if (selected === null) return { cancelled: true, completed: index };
       if (!selected) {
-        throw new Error(`TagAll could not select the WhatsApp member: ${participant}`);
+        skipped.push(participant);
+        onProgress(index + 1, participants.length, { selected: false, skipped: skipped.length });
+        continue;
       }
       insertText(composer, " ");
-      onProgress(index + 1, participants.length);
+      completed += 1;
+      onProgress(index + 1, participants.length, { selected: true, skipped: skipped.length });
     }
-    return { cancelled: false, completed: participants.length };
+    return { cancelled: false, completed, skipped };
   }
 
   TagAll.mentions = Object.freeze({ appendMentions, normaliseForMatch, tryAppendNativeAll });
