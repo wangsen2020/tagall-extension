@@ -20,9 +20,10 @@
     ]).filter((element) => element.offsetParent !== null);
   }
 
-  async function selectMention(query) {
+  async function selectMention(query, shouldCancel) {
     const target = normaliseForMatch(query);
     for (let attempt = 0; attempt < 8; attempt += 1) {
+      if (shouldCancel()) return null;
       const options = visibleMentionOptions();
       const exact = options.find((option) => normaliseForMatch(option.textContent || "") === target);
       const partial = options.find((option) => normaliseForMatch(option.textContent || "").includes(target));
@@ -43,12 +44,15 @@
     }
   }
 
-  async function appendOneMention(composer, participant, delayMs) {
+  async function appendOneMention(composer, participant, delayMs, shouldCancel) {
     for (const query of TagAll.participants.mentionQueries(participant)) {
+      if (shouldCancel()) return null;
       insertText(composer, `@${query}`);
       await wait(delayMs);
-      if (await selectMention(query)) return true;
+      const selected = await selectMention(query, shouldCancel);
+      if (selected) return true;
       removeFailedQuery(composer);
+      if (shouldCancel()) return null;
       await wait(50);
     }
     return false;
@@ -59,7 +63,8 @@
 
     for (const [index, participant] of participants.entries()) {
       if (shouldCancel()) return { cancelled: true, completed: index };
-      const selected = await appendOneMention(composer, participant, delayMs);
+      const selected = await appendOneMention(composer, participant, delayMs, shouldCancel);
+      if (selected === null) return { cancelled: true, completed: index };
       if (!selected) {
         throw new Error(`TagAll could not select the WhatsApp member: ${participant}`);
       }

@@ -1,8 +1,12 @@
 (() => {
   const TagAll = globalThis.TagAll;
   const BUTTON_ID = "tagall-inline-button";
+  const STOP_BUTTON_ID = "tagall-stop-button";
 
-  function remove() { document.getElementById(BUTTON_ID)?.remove(); }
+  function remove() {
+    document.getElementById(BUTTON_ID)?.remove();
+    document.getElementById(STOP_BUTTON_ID)?.remove();
+  }
 
   function mount() {
     if (document.getElementById(BUTTON_ID)) return;
@@ -18,8 +22,24 @@
       margin: "0 8px", padding: "6px 10px", border: "0", borderRadius: "999px",
       background: "#0b8f74", color: "white", fontWeight: "600", cursor: "pointer"
     });
+    const stopButton = document.createElement("button");
+    stopButton.id = STOP_BUTTON_ID;
+    stopButton.type = "button";
+    stopButton.textContent = "■";
+    stopButton.title = "Stop preparing mentions";
+    stopButton.setAttribute("aria-label", "Stop preparing mentions");
+    Object.assign(stopButton.style, {
+      display: "none", margin: "0 4px 0 0", padding: "6px 10px", border: "0", borderRadius: "999px",
+      background: "#d93838", color: "white", fontWeight: "700", cursor: "pointer"
+    });
+    stopButton.addEventListener("click", () => {
+      TagAll.controller.cancel();
+      stopButton.disabled = true;
+      stopButton.title = "Stopping after the current member";
+    });
     button.addEventListener("click", async () => {
       button.disabled = true;
+      stopButton.style.display = "inline-block";
       const originalText = button.textContent;
       try {
         await TagAll.controller.tagCurrentGroup({
@@ -30,9 +50,14 @@
       } finally {
         button.disabled = false;
         button.textContent = originalText;
+        stopButton.disabled = false;
+        stopButton.style.display = "none";
+        stopButton.title = "Stop preparing mentions";
       }
     });
-    composer.closest("footer")?.prepend(button);
+    const footer = composer.closest("footer");
+    footer?.prepend(stopButton);
+    footer?.prepend(button);
   }
 
   TagAll.inlineButton = Object.freeze({ mount, remove });

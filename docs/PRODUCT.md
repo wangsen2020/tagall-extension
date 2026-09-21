@@ -19,7 +19,7 @@ The product must not claim to unlock WhatsApp's native feature or evade an admin
 ## MVP guardrails
 
 - No automatic message sending
-- A visible stop control during mention preparation
+- A visible red stop icon during mention preparation; it stops before the next member is added
 - A moderate default insertion delay
 - Local-only processing of participant labels
 - Clear reminders to use mentions only for relevant, consented communication
