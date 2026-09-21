@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "TagAll",
+  "version": "0.1.0",
+  "description": "Prepare a mention for each participant in the current WhatsApp Web group.",
+  "action": {
+    "default_title": "TagAll",
+    "default_popup": "src/popup/popup.html"
+  },
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://web.whatsapp.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": [
+        "src/core/config.js",
+        "src/core/dom.js",
+        "src/core/participants.js",
+        "src/core/mentions.js",
+        "src/core/tag-controller.js",
+        "src/ui/inline-button.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
