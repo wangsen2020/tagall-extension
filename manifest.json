@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TagAll",
   "version": "0.1.0",
-  "description": "Prepare a mention for each participant in the current WhatsApp Web group.",
+  "description": "Prepare individual group mentions when WhatsApp's native @all is unavailable or you do not have permission to use it.",
   "action": {
     "default_title": "TagAll",
     "default_popup": "src/popup/popup.html"
