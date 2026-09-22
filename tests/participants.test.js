@@ -11,5 +11,4 @@ vm.runInNewContext(fs.readFileSync("src/core/participants.js", "utf8"), context)
 assert.deepEqual([...context.TagAll.participants.splitCandidates("Ada, Lin, You")], ["Ada", "Lin"]);
 assert.deepEqual([...context.TagAll.participants.splitCandidates("张三，李四、王五")], ["张三", "李四", "王五"]);
 assert.deepEqual([...context.TagAll.participants.splitCandidates("Ada is typing, Lin")], []);
-assert.deepEqual([...context.TagAll.participants.mentionQueries("+86 185 6563 4082")], ["+86 185 6563 4082", "+8618565634082", "8618565634082", "65634082"]);
 console.log("Participant parsing tests passed.");

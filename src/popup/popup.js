@@ -1,47 +1,36 @@
-const tagButton = document.getElementById("tag-all");
-const cancelButton = document.getElementById("cancel");
-const status = document.getElementById("status");
 const inlineToggle = document.getElementById("show-inline");
+const interceptToggle = document.getElementById("intercept-send");
+const keywordInput = document.getElementById("keyword");
+const status = document.getElementById("status");
 
-function setStatus(message) { status.textContent = message; }
+const DEFAULT_KEYWORD = "@everyone";
 
-async function activeTab() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) throw new Error("No active browser tab is available.");
-  return tab;
+function setStatus(message) {
+  status.textContent = message;
 }
 
-async function send(type) {
-  const tab = await activeTab();
-  return chrome.tabs.sendMessage(tab.id, { type });
-}
+chrome.storage.local
+  .get(["showInlineButton", "interceptSend", "keyword"])
+  .then(({ showInlineButton = true, interceptSend = true, keyword = DEFAULT_KEYWORD }) => {
+    inlineToggle.checked = showInlineButton;
+    interceptToggle.checked = interceptSend;
+    keywordInput.value = keyword;
+  });
 
-async function prepareMentions() {
-  tagButton.disabled = true;
-  cancelButton.hidden = false;
-  setStatus("Preparing mentions. Please keep WhatsApp Web open.");
-  try {
-    const response = await send("TAG_ALL");
-    if (!response?.ok) throw new Error(response?.error || "TagAll could not reach WhatsApp Web.");
-    if (response.cancelled) {
-      setStatus("Stopped. Existing mentions were kept.");
-    } else if (response.mode === "native-all") {
-      setStatus("WhatsApp native @all is available and ready. Review and send when ready.");
-    } else {
-      const skipped = response.skipped?.length || 0;
-      setStatus(skipped
-        ? `Prepared ${response.completed} mentions. ${skipped} members could not be matched and were skipped.`
-        : `Prepared ${response.completed} individual mentions. Review and send when ready.`);
-    }
-  } catch (error) {
-    setStatus(error.message);
-  } finally {
-    tagButton.disabled = false;
-    cancelButton.hidden = true;
-  }
-}
+inlineToggle.addEventListener("change", async () => {
+  await chrome.storage.local.set({ showInlineButton: inlineToggle.checked });
+});
 
-tagButton.addEventListener("click", prepareMentions);
-cancelButton.addEventListener("click", async () => { await send("CANCEL_TAG_ALL"); setStatus("Stopping after the current mention."); });
-chrome.storage.sync.get("showInlineButton").then(({ showInlineButton = true }) => { inlineToggle.checked = showInlineButton; });
-inlineToggle.addEventListener("change", async () => { await chrome.storage.sync.set({ showInlineButton: inlineToggle.checked }); });
+interceptToggle.addEventListener("change", async () => {
+  await chrome.storage.local.set({ interceptSend: interceptToggle.checked });
+  setStatus(interceptToggle.checked
+    ? "TagAll will mention everyone when your message contains the keyword."
+    : "TagAll will leave your messages alone.");
+});
+
+keywordInput.addEventListener("change", async () => {
+  const keyword = keywordInput.value.trim() || DEFAULT_KEYWORD;
+  keywordInput.value = keyword;
+  await chrome.storage.local.set({ keyword });
+  setStatus(`Keyword set to ${keyword}.`);
+});

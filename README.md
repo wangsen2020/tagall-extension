@@ -1,34 +1,44 @@
 # TagAll
 
-TagAll is a small, privacy-first Chrome extension for people who need to mention a WhatsApp Web group but cannot use WhatsApp's native `@all` command. It prepares an individual `@` mention for each participant in the currently open group. It never sends a message: the user always reviews the composed message and chooses whether to send it.
+TagAll is a small, privacy-first Chrome extension for mentioning every member of a WhatsApp Web group without pasting a wall of names into the message.
 
-When used in a group, TagAll checks for WhatsApp's native `@all` candidate first. If it can select the native command, it uses that single mention. Otherwise it falls back to individually selected member mentions.
+## How it works
 
-If WhatsApp cannot match a participant, TagAll removes that failed query, records it as skipped, and continues with the remaining members. It never leaves an unmatched `@name` or `@phone` as if it were a real mention.
+1. Open a group and click the **@** button next to the message box. TagAll inserts the keyword `@everyone`.
+2. Type your message after the keyword.
+3. Press send. TagAll turns that one message into a group mention: every member is notified, and the message body stays exactly what you typed.
+
+TagAll only acts when you press send yourself. It never sends anything on its own, and it never sends a message that does not contain the keyword.
+
+The keyword is configurable in the extension popup, and the whole behaviour can be switched off there.
 
 ## Why TagAll exists
 
-WhatsApp has introduced a native `@all` group mention. Its rollout, availability, and permissions can vary by group and account. TagAll does not replace or circumvent native `@all` permissions. It helps a user prepare the same individual mentions they could otherwise add manually when the native command is unavailable to them.
+WhatsApp offers a native group mention, but its rollout, group conditions, and permissions vary. Community operators, promoters, organizers, and support teams often participate in groups without the permission to use it.
 
-This is especially useful for community operators, promoters, organizers, and support teams who participate in groups without administrator access. Use it only for relevant, consented communications; unwanted mass mentions reduce trust and may violate WhatsApp rules.
+The obvious workaround — typing one `@` mention per member — does not scale. In a 118-member group it means 118 picker interactions, and the resulting message is an unreadable wall of names. TagAll sends the same notification with a clean message body.
 
-## Status
-
-This is an early open-source foundation. WhatsApp Web is a third-party interface whose markup can change without notice, so the participant-detection logic needs ongoing browser testing. TagAll selects WhatsApp's visible mention candidate instead of treating typed `@name` text as a successful mention; this distinction is especially important for members whose visible label is a phone number.
+Use it only for relevant, consented communications. Unwanted mass mentions reduce trust and may violate WhatsApp rules.
 
 ## Project structure
 
-```
-src/
-  core/       DOM access, participant discovery, mention insertion, state control
-  ui/         WhatsApp Web inline button
-  popup/      Chrome action popup
-  content.js  Content-script orchestration and message boundary
-tests/        Focused unit tests for pure parsing logic
-docs/         Privacy and contribution guidance
+```text
+manifest.json              Chrome Manifest V3 configuration
+src/content.js             Content script: injection pipeline and settings relay
+src/core/config.js         Constants and default settings
+src/core/dom.js            WhatsApp Web DOM lookups
+src/core/participants.js   Group detection from the conversation header
+src/ui/inline-button.js    The @ button next to the message box
+src/inject/bootstrap.js    Page-world probe that decides when wa-js may load
+src/inject/tagall-page.js  Page-world send interception
+src/popup/                 Extension popup
+vendor/wa-js.js            WPPConnect/WA-JS 4.6.0, bundled locally
+tests/                     Focused unit tests for pure parsing logic
 ```
 
-The code intentionally uses native browser APIs and has no build step. The script order in `manifest.json` makes dependencies explicit.
+Scripts are injected into the page world through `web_accessible_resources`, not through a `world: "MAIN"` content script, because wa-js can only hook WhatsApp's module runtime once that runtime exists. `bootstrap.js` waits for `document.readyState === "complete"`, the WhatsApp shell, a live module runtime, and two consecutive stable checks before it asks for wa-js to be injected.
+
+No remote code is loaded: wa-js ships inside the extension.
 
 ## Local installation
 
@@ -36,27 +46,24 @@ The code intentionally uses native browser APIs and has no build step. The scrip
 2. Visit `chrome://extensions` in Chrome.
 3. Enable **Developer mode**.
 4. Select **Load unpacked** and choose this repository's root folder.
-5. Open a WhatsApp Web group, then use the TagAll popup or `@ All` button.
+5. Open a WhatsApp Web group and use the **@** button.
+
+After changing any source file, press the reload icon on the extension card. The version in `manifest.json` is bumped on every change so you can confirm the reload took effect.
 
 ## Safety and privacy
 
 - TagAll runs only on `https://web.whatsapp.com/*`.
-- It reads participant labels visible in the currently open group only to prepare mentions locally.
-- It has no analytics, network requests, background page, or automatic sending.
-- TagAll does not bypass native `@all` permissions. It prepares ordinary individual mentions only.
-- Keep a human in control: review every generated mention list before sending.
+- It reads the open group's participant list locally to build the mention list. Nothing is written to disk and nothing is uploaded.
+- It has no analytics and no network requests of its own.
+- It sends only the message you typed, only when you press send, and only when your message contains the keyword.
 
 See [privacy guidance](docs/PRIVACY.md) before publishing to the Chrome Web Store.
 
 ## Development
 
-Run the focused parser test:
-
 ```powershell
 node tests/participants.test.js
 ```
-
-Before releasing, manually test ordinary groups, large groups, non-Latin display names, a direct message, a chat while someone is typing, and a composer that already contains draft text.
 
 ## License
 

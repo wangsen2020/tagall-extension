@@ -1,27 +1,56 @@
 {
   "manifest_version": 3,
   "name": "TagAll",
-  "version": "0.1.0",
-  "description": "Prepare individual group mentions when WhatsApp's native @all is unavailable or you do not have permission to use it.",
+  "version": "0.2.7",
+  "description": "Mention every member of a WhatsApp group with one keyword, instead of pasting a wall of @names.",
+  "icons": {
+    "16": "store-assets/icon-16.png",
+    "32": "store-assets/icon-32.png",
+    "48": "store-assets/icon-48.png",
+    "128": "store-assets/icon-128.png"
+  },
   "action": {
     "default_title": "TagAll",
-    "default_popup": "src/popup/popup.html"
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "store-assets/icon-16.png",
+      "32": "store-assets/icon-32.png",
+      "48": "store-assets/icon-48.png",
+      "128": "store-assets/icon-128.png"
+    }
   },
-  "permissions": ["activeTab", "storage"],
-  "host_permissions": ["https://web.whatsapp.com/*"],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://web.whatsapp.com/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://web.whatsapp.com/*"],
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ],
       "js": [
         "src/core/config.js",
         "src/core/dom.js",
         "src/core/participants.js",
-        "src/core/mentions.js",
-        "src/core/tag-controller.js",
         "src/ui/inline-button.js",
         "src/content.js"
       ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/inject/bootstrap.js",
+        "src/inject/tagall-page.js",
+        "vendor/wa-js.js"
+      ],
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ]
     }
   ]
 }

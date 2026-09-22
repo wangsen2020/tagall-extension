@@ -8,25 +8,6 @@
     return value.replace(/\s+/g, " ").trim();
   }
 
-  function isPhoneNumber(value) {
-    return /^\+?[\d\s().-]{7,}$/.test(value.trim());
-  }
-
-  function normalisePhone(value) {
-    const digits = value.replace(/\D/g, "");
-    return value.trim().startsWith("+") ? `+${digits}` : digits;
-  }
-
-  function mentionQueries(value) {
-    const original = normaliseName(value);
-    if (!isPhoneNumber(original)) return [original];
-
-    const normalized = normalisePhone(original);
-    const digits = normalized.replace(/^\+/, "");
-    const variants = [original, normalized, digits, digits.slice(-8)];
-    return [...new Set(variants.filter((item) => item.length >= 6))];
-  }
-
   function splitCandidates(value) {
     if (!value || !SEPARATORS.test(value) || EXCLUDED_STATUS.test(value)) return [];
 
@@ -66,7 +47,5 @@
     return collectFromHeader(TagAll.dom.findConversationHeader());
   }
 
-  TagAll.participants = Object.freeze({
-    splitCandidates, collectFromHeader, collectFromPage, isPhoneNumber, mentionQueries
-  });
+  TagAll.participants = Object.freeze({ splitCandidates, collectFromHeader, collectFromPage });
 })();

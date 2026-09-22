@@ -9,12 +9,17 @@
   <body>
     <main>
       <h1>TagAll</h1>
-      <p class="subtitle">Prepare group mentions. You review and send the message.</p>
-      <button id="tag-all" class="primary">Prepare @ mentions</button>
-      <button id="cancel" class="secondary" hidden>Stop</button>
-      <p id="status" role="status">Open a WhatsApp Web group chat to begin.</p>
-      <label class="setting"><input id="show-inline" type="checkbox" checked /> Show the @ All button in group chats</label>
-      <p class="notice">TagAll processes group names in your browser. It does not send messages or upload chat data.</p>
+      <p class="subtitle">Mention everyone in a group without pasting a wall of @names.</p>
+      <ol class="steps">
+        <li>Open a WhatsApp Web group and click the <strong>@</strong> button next to the message box.</li>
+        <li>Type your message after the keyword.</li>
+        <li>Press send. TagAll turns it into one message that mentions every member.</li>
+      </ol>
+      <label class="setting"><input id="intercept-send" type="checkbox" checked /> Mention everyone when a message contains the keyword</label>
+      <label class="setting"><input id="show-inline" type="checkbox" checked /> Show the @ button in group chats</label>
+      <label class="setting">Keyword <input id="keyword" type="text" spellcheck="false" /></label>
+      <p id="status" role="status"></p>
+      <p class="notice">TagAll reads the open group in your browser and uploads nothing. It only sends a message when you press send yourself.</p>
     </main>
     <script src="popup.js"></script>
   </body>
