@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="At symbol">
-  <!-- The 10px inset keeps the mark clear of Chrome's icon mask and surrounding UI. -->
-  <rect x="10" y="10" width="108" height="108" rx="28" fill="#0b8f74"/>
-  <!-- Deliberately a single, high-contrast @ glyph: it remains legible at 16px. -->
-  <text x="63" y="91" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="700" text-anchor="middle">@</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="At symbol inside a chat bubble">
+  <!-- A generic chat bubble: it reads as a messaging tool without borrowing any brand's mark.
+       The colour is TagAll's own #0b8f74, deliberately not WhatsApp's #25D366. -->
+  <path fill="#0b8f74" d="M30 12h68a22 22 0 0 1 22 22v44a22 22 0 0 1-22 22H62l-22 20a3 3 0 0 1-5-2.3V100h-5A22 22 0 0 1 8 78V34a22 22 0 0 1 22-22z"/>
+  <!-- A single high-contrast @ glyph, centred in the bubble body so it survives 16px. -->
+  <text x="64" y="83" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700" text-anchor="middle">@</text>
 </svg>

@@ -3,7 +3,7 @@
   const STATE_KEY = "__TAGALL_PAGE__";
   if (window[STATE_KEY]) return;
 
-  const BUILD = "0.2.7";
+  const BUILD = "0.2.8";
   const state = { build: BUILD, enabled: true, keyword: "@everyone", busy: false };
   window[STATE_KEY] = state;
 
