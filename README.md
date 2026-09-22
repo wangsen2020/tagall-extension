@@ -1,6 +1,6 @@
 # TagAll
 
-TagAll is a small, privacy-first Chrome extension for mentioning every member of a WhatsApp Web group without pasting a wall of names into the message.
+**静默 @ 通知所有人** —— TagAll is a small, privacy-first Chrome extension that notifies every member of a WhatsApp Web group with one message, without pasting a wall of names into it.
 
 ## How it works
 
