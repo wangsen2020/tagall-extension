@@ -57,7 +57,7 @@ After changing any source file, press the reload icon on the extension card. The
 - It has no analytics and no network requests of its own.
 - It sends only the message you typed, only when you press send, and only when your message contains the keyword.
 
-See [privacy guidance](docs/PRIVACY.md) before publishing to the Chrome Web Store.
+See [privacy guidance](./docs/1.%20隐私政策草稿_20260921_1713_wangsen.md) before publishing to the Chrome Web Store.
 
 ## Development
 
